@@ -36,13 +36,14 @@ setenforce 0
 systemctl disable firewalld
 yum install -y yum-plugin-priorities
 
-echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" > /etc/hosts
-echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
-echo "192.168.33.81 ceph1.slave ceph1" >> /etc/hosts
-echo "192.168.33.82 ceph2.slave ceph2" >> /etc/hosts
-echo "192.168.33.83 ceph3.slave ceph3" >> /etc/hosts
-echo "192.168.33.80 ceph.master ceph" >> /etc/hosts
-
+cat << EOF /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.33.80 ceph.master ceph
+192.168.33.81 ceph1.slave ceph1
+192.168.33.82 ceph2.slave ceph2
+192.168.33.83 ceph3.slave ceph3
+EOF
 
 echo
 echo "************************************************"
