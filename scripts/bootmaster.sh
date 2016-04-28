@@ -114,6 +114,33 @@ systemctl disable firewalld
 yum install -y yum-plugin-priorities
 
 echo   
+echo "********************************************************"
+echo "*                                                      *"
+echo "*     install apache (this may actually not be needed) *"  
+echo "*                                                      *"  
+echo "********************************************************" 
+echo
+
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd
+yum install -y php php-cli mod_fastcgi
+cat << EOF > /var/www/cgi-bin/php.fastcgi
+#!/bin/bash
+PHPRC="/etc/php.ini"
+PHP_FCGI_CHILDREN=4
+PHP_FCGI_MAX_REQUESTS=1000
+export PHPRC
+export PHP_FCGI_CHILDREN
+export PHP_FCGI_MAX_REQUESTS
+exec /usr/bin/php-cgi
+EOF
+chown apache:apache /var/www/cgi-bin/php.fastcgi
+chmod +x /var/www/cgi-bin/php.fastcgi
+
+
+echo   
 echo "**************************************************************"
 echo "*                                                            *"
 echo "*     create a very basic script to create a storage cluster *"  
@@ -122,6 +149,13 @@ echo "**************************************************************"
 echo
 
 cat << EOF > /home/vagrant/create_csc.sh
+#
+# Note: do not start to run all commands at once.
+# first try them one-by-one
+#
+# Do not run under root!
+# I usually use user vagrant
+#
 ssh-keygen
 ssh-copy-id xyzuser@ceph1.slave
 ssh-copy-id xyzuser@ceph2.slave
@@ -132,12 +166,62 @@ ceph-deploy new ceph1
 echo "osd pool default size = 2" >> ceph.conf
 sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
 ceph-deploy install ceph ceph1.slave ceph2.slave ceph3.slave
+# Note: if this fails, and sometimes it does. Stop here
+# re-run the mv command and try the ceph-deploy install again.
+# should work now
+
 ceph-deploy mon create-initial
 ceph-deploy osd prepare ceph2.slave:/var/local/osd0 ceph3.slave:/var/local/osd1
 ceph-deploy osd activate ceph2.slave:/var/local/osd0 ceph3.slave:/var/local/osd1
 ceph-deploy admin ceph ceph1 ceph2.slave ceph3.slave
 sudo chmod +r /etc/ceph/ceph.client.admin.keyring
 ceph health
+ceph -s
+# Hope you get an healty state. If so: phase one is done!
+EOF
+
+echo   
+echo "**************************************************************"
+echo "*                                                            *"
+echo "*     create a very basic script to create an S3 Gateway     *"  
+echo "*                                                            *"  
+echo "**************************************************************" 
+echo
+
+cat << EOF > /home/vagrant/create_s3g.sh
+#
+# Install the Ceph Object Gateway package on all the client nodes
+ceph-deploy install --rgw ceph1.slave ceph2.slave ceph3.slave
+# create an instance of the Ceph Object Gateway on all the client nodes
+ceph-deploy rgw create ceph1.slave ceph2.slave ceph3.slave
+# check
+curl ceph1.slave:7480
+# Generate a Ceph Object Gateway user name and key for each instance
+sudo ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rwx' -o /etc/ceph/ceph.client.radosgw.keyring
+# distribute the keyring to the node with the gateway instance (not sure this is needed)
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph1.slave:/home/xyzuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph2.slave:/home/xyzuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph3.slave:/home/xyzuser
+# Now change the CEPH configuration file
+sudo vim /etc/ceph/ceph.conf
+# Add this:
+#client.radosgw.gateway]
+#host = {hostname}
+#keyring = /etc/ceph/ceph.client.radosgw.keyring
+#rgw socket path = /var/run/ceph/ceph.radosgw.gateway.fastcgi.sock
+#log file = /var/log/radosgw/client.radosgw.gateway.log
+#rgw print continue = false 
+#
+# 
+ceph-deploy --overwrite-conf config pull ceph
+ceph-deploy --overwrite-conf config push ceph1.slave ceph2.slave ceph3.slave
+# create data directory
+sudo mkdir -p /var/lib/ceph/radosgw/ceph-radosgw.gateway
+# grant permission to apache
+sudo chown apache:apache /var/run/ceph
+#
+# to be continued. Should change this completely because the instruction from Ceph does not make sense
+
 EOF
 
 chmod +x create_csc.sh
