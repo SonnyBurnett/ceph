@@ -84,21 +84,33 @@ cat << EOF /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.33.80 ceph.master ceph
-192.168.33.81 ceph1.slave ceph1
-192.168.33.82 ceph2.slave ceph2
-192.168.33.83 ceph3.slave ceph3
+192.168.33.81 ceph1.mon1 ceph1
+192.168.33.82 ceph2.mon2 ceph2
+192.168.33.83 ceph3.mon3 ceph3
+192.168.33.84 cepha.node1 cepha
+192.168.33.85 cephb.node2 cephb
+192.168.33.86 cephc.node3 cephc
 EOF
 
 cat << EOF > /home/vagrant/.ssh/config
 Host 192.168.33.81
-    Hostname ceph1.slave
-    User xyxuser
+    Hostname ceph1.mon1
+    User cephuser
 Host 192.168.33.82
-    Hostname ceph2.slave
-    User xyzuser
+    Hostname ceph2.mon2
+    User cephuser
 Host 192.168.33.83
-    Hostname ceph3.slave
-    User xyzuser
+    Hostname ceph3.mon3
+    User cephuser
+Host 192.168.33.84
+    Hostname cepha.node1
+    User cephuser
+Host 192.168.33.85
+    Hostname cephb.node2
+    User cephuser
+Host 192.168.33.86
+    Hostname cephc.node3
+    User cephuser	
 EOF
 
 echo   
@@ -112,32 +124,6 @@ echo
 setenforce 0
 systemctl disable firewalld
 yum install -y yum-plugin-priorities
-
-echo   
-echo "********************************************************"
-echo "*                                                      *"
-echo "*     install apache (this may actually not be needed) *"  
-echo "*                                                      *"  
-echo "********************************************************" 
-echo
-
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
-systemctl status httpd
-yum install -y php php-cli mod_fastcgi
-cat << EOF > /var/www/cgi-bin/php.fastcgi
-#!/bin/bash
-PHPRC="/etc/php.ini"
-PHP_FCGI_CHILDREN=4
-PHP_FCGI_MAX_REQUESTS=1000
-export PHPRC
-export PHP_FCGI_CHILDREN
-export PHP_FCGI_MAX_REQUESTS
-exec /usr/bin/php-cgi
-EOF
-chown apache:apache /var/www/cgi-bin/php.fastcgi
-chmod +x /var/www/cgi-bin/php.fastcgi
 
 
 echo   
@@ -156,27 +142,56 @@ cat << EOF > /home/vagrant/create_csc.sh
 # Do not run under root!
 # I usually use user vagrant
 #
+# 
 ssh-keygen
-ssh-copy-id xyzuser@ceph1.slave
-ssh-copy-id xyzuser@ceph2.slave
-ssh-copy-id xyzuser@ceph3.slave
+ssh-copy-id cephuser@ceph1.mon1
+ssh-copy-id cephuser@ceph2.mon2
+ssh-copy-id cephuser@ceph3.mon3
+ssh-copy-id cephuser@cepha.node1
+ssh-copy-id cephuser@cephb.node2
+ssh-copy-id cephuser@cephc.node3
+
+# Create the directory for the new cluster
 sudo mkdir my-cluster
 sudo cd my-cluster
-ceph-deploy new ceph1
+# 
+# Create the new cluster by first installing the monitor nodes
+ceph-deploy new ceph1 ceph2 ceph3
+
+
+# set the default number of OSD on 2. Ceph can now run on just 2 OSD's
 echo "osd pool default size = 2" >> ceph.conf
+
+# This is a small trick when something goes wrong
 sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
-ceph-deploy install ceph ceph1.slave ceph2.slave ceph3.slave
+
+# Install Ceph on all the nodes, Admin node, OSD's and Monitors
+ceph-deploy install ceph ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3
 # Note: if this fails, and sometimes it does. Stop here
 # re-run the mv command and try the ceph-deploy install again.
 # should work now
 
+# Add the initial monitor(s) and gather the keys
+# After this command you will have 4 keyring files in your home directory
 ceph-deploy mon create-initial
-ceph-deploy osd prepare ceph2.slave:/var/local/osd0 ceph3.slave:/var/local/osd1
-ceph-deploy osd activate ceph2.slave:/var/local/osd0 ceph3.slave:/var/local/osd1
-ceph-deploy admin ceph ceph1 ceph2.slave ceph3.slave
+
+# Prepare the OSD's
+ceph-deploy osd prepare cepha.node1:/var/local/osd cephb.node2:/var/local/osd cephc.node3:/var/local/osd
+
+# activate the OSDs.
+ceph-deploy osd activate cepha.node1:/var/local/osd cephb.node2:/var/local/osd cephc.node3:/var/local/osd
+
+# copy the configuration file and admin key to your admin node and your Ceph Nodes
+# so that you can use the ceph CLI 
+ceph-deploy admin ceph ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3
+
+# Ensure that you have the correct permissions for the ceph.client.admin.keyring.
 sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+
+# Check your cluster’s health.
 ceph health
 ceph -s
+
 # Hope you get an healty state. If so: phase one is done!
 EOF
 
@@ -199,9 +214,9 @@ curl ceph1.slave:7480
 # Generate a Ceph Object Gateway user name and key for each instance
 sudo ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rwx' -o /etc/ceph/ceph.client.radosgw.keyring
 # distribute the keyring to the node with the gateway instance (not sure this is needed)
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph1.slave:/home/xyzuser
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph2.slave:/home/xyzuser
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring xyzuser@ceph3.slave:/home/xyzuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph1.slave:/home/cephuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph2.slave:/home/cephuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph3.slave:/home/cephuser
 # Now change the CEPH configuration file
 sudo vim /etc/ceph/ceph.conf
 # Add this:

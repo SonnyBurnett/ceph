@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# boot CEPH
+# boot CEPH node
 #
 
 
@@ -50,6 +50,9 @@ cat << EOF /etc/hosts
 192.168.33.85 cephb.node2 cephb
 192.168.33.86 cephc.node3 cephc
 EOF
+
+mkdir /var/local/osd
+chmod 777 /var/local/osd
 
 echo
 echo "************************************************"
