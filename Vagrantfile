@@ -4,47 +4,47 @@
 
 Vagrant.configure(2) do |config|
 	  
-   config.vm.define :cephnode1 do |cephnode1|
-      cephnode1.vm.box = "centos/7"  
-	  cephnode1.vm.network "private_network", ip: "192.168.33.81"
-	  cephnode1.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
-	  cephnode1.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
-	  cephnode1.vm.provider "virtualbox" do |vb|
+   config.vm.define :cephmon1 do |cephmon1|
+      cephmon1.vm.box = "centos/7"  
+	  cephmon1.vm.network "private_network", ip: "192.168.33.81"
+	  cephmon1.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
+	  cephmon1.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
+	  cephmon1.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephmon1"
       end
-	  cephnode1.vm.hostname = "ceph1.mon1"
-      cephnode1.vm.provision "shell" do |s|
+	  cephmon1.vm.hostname = "ceph1.mon1"
+      cephmon1.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end
    end 
   
-  config.vm.define :cephnode2 do |cephnode2|
-      cephnode2.vm.box = "centos/7"  
-	  cephnode2.vm.network "private_network", ip: "192.168.33.82"
-	  cephnode2.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
-	  cephnode2.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
-	  cephnode2.vm.provider "virtualbox" do |vb|
+  config.vm.define :cephmon2 do |cephmon2|
+      cephmon2.vm.box = "centos/7"  
+	  cephmon2.vm.network "private_network", ip: "192.168.33.82"
+	  cephmon2.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
+	  cephmon2.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
+	  cephmon2.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephmon2"
       end
-	  cephnode2.vm.hostname = "ceph2.mon2"
-      cephnode2.vm.provision "shell" do |s|
+	  cephmon2.vm.hostname = "ceph2.mon2"
+      cephmon2.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end
    end 
      
-   config.vm.define :cephnode3 do |cephnode3|
-      cephnode3.vm.box = "centos/7"  
-	  cephnode3.vm.network "private_network", ip: "192.168.33.83"
-	  cephnode3.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
-	  cephnode3.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
-	  cephnode3.vm.provider "virtualbox" do |vb|
+   config.vm.define :cephmon3 do |cephmon3|
+      cephmon3.vm.box = "centos/7"  
+	  cephmon3.vm.network "private_network", ip: "192.168.33.83"
+	  cephmon3.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
+	  cephmon3.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
+	  cephmon3.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
-	     vb.name = "cephnode3"
+	     vb.name = "cephmon3"
       end
-	  cephnode3.vm.hostname = "ceph3.mon3"
-      cephnode3.vm.provision "shell" do |s|
+	  cephmon3.vm.hostname = "ceph3.mon3"
+      cephmon3.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end
    end

@@ -26,7 +26,14 @@ yum install -y vim
 yum install -y rpm
 yum install -y wget
 
+# Make sure all the clocks on the nodes are synchronised
 yum install -y ntp ntpdate ntp-doc
+ntpdate 0.us.pool.ntp.org
+hwclock --systohc
+systemctl enable ntpd.service
+systemctl start ntpd.service
+
+
 yum install -y openssh-server
 
 useradd -d /home/cephuser -m cephuser
@@ -39,7 +46,7 @@ setenforce 0
 systemctl disable firewalld
 yum install -y yum-plugin-priorities
 
-cat << EOF /etc/hosts
+cat << EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.33.80 ceph.master ceph

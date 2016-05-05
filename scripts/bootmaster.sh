@@ -80,7 +80,7 @@ echo "*                                                      *"
 echo "********************************************************" 
 echo
 
-cat << EOF /etc/hosts
+cat << EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.33.80 ceph.master ceph
@@ -95,22 +95,22 @@ EOF
 cat << EOF > /home/vagrant/.ssh/config
 Host 192.168.33.81
     Hostname ceph1.mon1
-    User cephuser
+    User vagrant
 Host 192.168.33.82
     Hostname ceph2.mon2
-    User cephuser
+    User vagrant
 Host 192.168.33.83
     Hostname ceph3.mon3
-    User cephuser
+    User vagrant
 Host 192.168.33.84
     Hostname cepha.node1
-    User cephuser
+    User vagrant
 Host 192.168.33.85
     Hostname cephb.node2
-    User cephuser
+    User vagrant
 Host 192.168.33.86
     Hostname cephc.node3
-    User cephuser	
+    User vagrant	
 EOF
 
 echo   
@@ -120,6 +120,13 @@ echo "*     set some pre-requisites                          *"
 echo "*                                                      *"  
 echo "********************************************************" 
 echo
+
+# Make sure all the clocks on the nodes are synchronised
+yum install -y ntp ntpdate ntp-doc
+ntpdate 0.us.pool.ntp.org
+hwclock --systohc
+systemctl enable ntpd.service
+systemctl start ntpd.service
 
 setenforce 0
 systemctl disable firewalld
@@ -135,21 +142,19 @@ echo "**************************************************************"
 echo
 
 cat << EOF > /home/vagrant/create_csc.sh
-#
-# Note: do not start to run all commands at once.
-# first try them one-by-one
-#
-# Do not run under root!
-# I usually use user vagrant
-#
+#!/bin/bash
 # 
+# Script to create a RADOS Ceph Storage Cluster
+# 
+# Create a key on the admin node and copy it to all the other nodes
+# so the admin node can communicate without a password to the nodes
 ssh-keygen
-ssh-copy-id cephuser@ceph1.mon1
-ssh-copy-id cephuser@ceph2.mon2
-ssh-copy-id cephuser@ceph3.mon3
-ssh-copy-id cephuser@cepha.node1
-ssh-copy-id cephuser@cephb.node2
-ssh-copy-id cephuser@cephc.node3
+ssh-copy-id vagrant@ceph1.mon1
+ssh-copy-id vagrant@ceph2.mon2
+ssh-copy-id vagrant@ceph3.mon3
+ssh-copy-id vagrant@cepha.node1
+ssh-copy-id vagrant@cephb.node2
+ssh-copy-id vagrant@cephc.node3
 
 # Create the directory for the new cluster
 sudo mkdir my-cluster
@@ -167,6 +172,7 @@ sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
 
 # Install Ceph on all the nodes, Admin node, OSD's and Monitors
 ceph-deploy install ceph ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3
+
 # Note: if this fails, and sometimes it does. Stop here
 # re-run the mv command and try the ceph-deploy install again.
 # should work now
@@ -214,9 +220,9 @@ curl ceph1.slave:7480
 # Generate a Ceph Object Gateway user name and key for each instance
 sudo ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rwx' -o /etc/ceph/ceph.client.radosgw.keyring
 # distribute the keyring to the node with the gateway instance (not sure this is needed)
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph1.slave:/home/cephuser
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph2.slave:/home/cephuser
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring cephuser@ceph3.slave:/home/cephuser
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph1.slave:/home/vagrant
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph2.slave:/home/vagrant
+#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph3.slave:/home/vagrant
 # Now change the CEPH configuration file
 sudo vim /etc/ceph/ceph.conf
 # Add this:
