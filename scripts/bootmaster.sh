@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 #
-# boot CEPH
+# Create a CEPH admin node with ceph-deploy installed
+# 
+# Based on: http://docs.ceph.com/docs/master/start/quick-start-preflight/
+# and based on: http://www.virtualtothecore.com/en/adventures-ceph-storage-part-1-introduction/
 #
-
+# This script is part of a code package that creates a Ceph Storage cluster
+# with 1 admin node, 3 monitors and 3 OSD's
+#
+# The script is intended for a Centos 7 VM
+#
 
 echo
 echo "************************************************"
@@ -128,8 +135,13 @@ hwclock --systohc
 systemctl enable ntpd.service
 systemctl start ntpd.service
 
+# SELinux must be Permissive or disabled
 setenforce 0
+
+# Turn off the firewall (or open the appropriate ports (6789, 6800:7300)
 systemctl disable firewalld
+
+# Ensure that your package manager has priority/preferences packages installed and enabled
 yum install -y yum-plugin-priorities
 
 
@@ -210,42 +222,31 @@ echo "**************************************************************"
 echo
 
 cat << EOF > /home/vagrant/create_s3g.sh
+#!/bin/bash
+# 
+# Script to create an S3 Gateway
+# from: http://docs.ceph.com/docs/master/install/install-ceph-gateway/
 #
 # Install the Ceph Object Gateway package on all the client nodes
-ceph-deploy install --rgw ceph1.slave ceph2.slave ceph3.slave
-# create an instance of the Ceph Object Gateway on all the client nodes
-ceph-deploy rgw create ceph1.slave ceph2.slave ceph3.slave
-# check
-curl ceph1.slave:7480
-# Generate a Ceph Object Gateway user name and key for each instance
-sudo ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rwx' -o /etc/ceph/ceph.client.radosgw.keyring
-# distribute the keyring to the node with the gateway instance (not sure this is needed)
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph1.slave:/home/vagrant
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph2.slave:/home/vagrant
-#sudo scp /etc/ceph/ceph.client.radosgw.keyring vagrant@ceph3.slave:/home/vagrant
-# Now change the CEPH configuration file
-sudo vim /etc/ceph/ceph.conf
-# Add this:
-#client.radosgw.gateway]
-#host = {hostname}
-#keyring = /etc/ceph/ceph.client.radosgw.keyring
-#rgw socket path = /var/run/ceph/ceph.radosgw.gateway.fastcgi.sock
-#log file = /var/log/radosgw/client.radosgw.gateway.log
-#rgw print continue = false 
-#
+ceph-deploy install --rgw ceph1.mon1
+
+# make your Ceph Object Gateway node an administrator node
+ceph-deploy admin ceph1.mon1
+
+# From the working directory of your administration server, 
+# create an instance of the Ceph Object Gateway on the Ceph Object Gateway.
+sudo cd ~/mycluster
+ceph-deploy rgw create ceph1.mon1
+
+# test the gateway
+curl http://cepha.node1:7480
+
 # 
-ceph-deploy --overwrite-conf config pull ceph
-ceph-deploy --overwrite-conf config push ceph1.slave ceph2.slave ceph3.slave
-# create data directory
-sudo mkdir -p /var/lib/ceph/radosgw/ceph-radosgw.gateway
-# grant permission to apache
-sudo chown apache:apache /var/run/ceph
-#
-# to be continued. Should change this completely because the instruction from Ceph does not make sense
+
 
 EOF
 
-chmod +x create_csc.sh
+chmod +x create_csc.sh create_s3g.sh
 
 echo
 echo "************************************************"
