@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+file_to_disk = './tmp/large_disk.vdi'
 
 Vagrant.configure(2) do |config|
 	  
@@ -49,6 +50,8 @@ Vagrant.configure(2) do |config|
       end
    end
    
+ 
+   
    config.vm.define :cephnode4 do |cephnode4|
       cephnode4.vm.box = "centos/7"  
 	  cephnode4.vm.network "private_network", ip: "192.168.33.84"
@@ -57,8 +60,12 @@ Vagrant.configure(2) do |config|
 	  cephnode4.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode4"
-      end
+		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
+         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+     
+	 end
 	  cephnode4.vm.hostname = "cepha.node1"
+	  
       cephnode4.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end
@@ -72,8 +79,12 @@ Vagrant.configure(2) do |config|
 	  cephnode5.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode5"
+		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
+         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+     
       end
 	  cephnode5.vm.hostname = "cephb.node2"
+	  
       cephnode5.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end
@@ -87,8 +98,12 @@ Vagrant.configure(2) do |config|
 	  cephnode6.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode6"
+		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
+         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+     
       end
 	  cephnode6.vm.hostname = "cephc.node3"
+	  
       cephnode6.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
       end

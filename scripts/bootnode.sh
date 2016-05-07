@@ -66,7 +66,7 @@ yum install -y yum-plugin-priorities
 cat << EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.33.80 ceph.master ceph
+192.168.33.80 cephm.master cephm
 192.168.33.81 ceph1.mon1 ceph1
 192.168.33.82 ceph2.mon2 ceph2
 192.168.33.83 ceph3.mon3 ceph3

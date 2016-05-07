@@ -61,7 +61,7 @@ echo
 cat << EOF > /etc/yum.repos.d/ceph.repo
 [ceph-noarch]
 name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-infernalis/el7/noarch
+baseurl=http://download.ceph.com/rpm-giant/el7/noarch
 enabled=1
 gpgcheck=1
 type=rpm-md
@@ -90,7 +90,7 @@ echo
 cat << EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.33.80 ceph.master ceph
+192.168.33.80 cephm.master cephm
 192.168.33.81 ceph1.mon1 ceph1
 192.168.33.82 ceph2.mon2 ceph2
 192.168.33.83 ceph3.mon3 ceph3
@@ -153,7 +153,11 @@ echo "*                                                            *"
 echo "**************************************************************" 
 echo
 
-cat << EOF > /home/vagrant/create_csc.sh
+mkdir my-cluster
+chown vagrant:vagrant my-cluster
+cd my-cluster
+
+cat << EOF > step1.sh
 #!/bin/bash
 # 
 # Script to create a RADOS Ceph Storage Cluster
@@ -167,41 +171,80 @@ ssh-copy-id vagrant@ceph3.mon3
 ssh-copy-id vagrant@cepha.node1
 ssh-copy-id vagrant@cephb.node2
 ssh-copy-id vagrant@cephc.node3
+ssh-copy-id vagrant@cephm.master
 
-# Create the directory for the new cluster
-sudo mkdir my-cluster
-sudo cd my-cluster
+EOF
+
+cat << EOF > step2.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
 # 
 # Create the new cluster by first installing the monitor nodes
-ceph-deploy new ceph1 ceph2 ceph3
+ceph-deploy new ceph1.mon1 ceph2.mon2 ceph3.mon3
 
 
 # set the default number of OSD on 2. Ceph can now run on just 2 OSD's
 echo "osd pool default size = 2" >> ceph.conf
+echo "osd pool default min size = 1" >> ceph.conf
+echo "osd pool default pg num = 256" >> ceph.conf
+echo "osd pool default pgp num = 256" >> ceph.conf
+echo "osd crush chooseleaf type = 1" >> ceph.conf
+# check
+ceph-deploy disk list cepha.node1
+EOF
 
-# This is a small trick when something goes wrong
-sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
-
+cat << EOF > step3.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
 # Install Ceph on all the nodes, Admin node, OSD's and Monitors
-ceph-deploy install ceph ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3
+ceph-deploy install ceph1.mon1 
+ceph-deploy install ceph2.mon2 
+ceph-deploy install ceph3.mon3 
+ceph-deploy install cepha.node1 
+ceph-deploy install cephb.node2 
+ceph-deploy install cephc.node3
+ceph-deploy install cephm.master
+# This is a small trick when something goes wrong
+# sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
+EOF
 
-# Note: if this fails, and sometimes it does. Stop here
-# re-run the mv command and try the ceph-deploy install again.
-# should work now
-
+cat << EOF > step4.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
 # Add the initial monitor(s) and gather the keys
 # After this command you will have 4 keyring files in your home directory
 ceph-deploy mon create-initial
+ls -al /home/vagrant/my-cluster/*keyring
 
+EOF
+
+cat << EOF > step5.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
 # Prepare the OSD's
 ceph-deploy osd prepare cepha.node1:/var/local/osd cephb.node2:/var/local/osd cephc.node3:/var/local/osd
 
 # activate the OSDs.
 ceph-deploy osd activate cepha.node1:/var/local/osd cephb.node2:/var/local/osd cephc.node3:/var/local/osd
 
+EOF
+
+cat << EOF > step6.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
 # copy the configuration file and admin key to your admin node and your Ceph Nodes
 # so that you can use the ceph CLI 
-ceph-deploy admin ceph ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3
+ceph-deploy admin ceph1.mon1 ceph2.mon2 ceph3.mon3 cepha.node1 cephb.node2 cephc.node3 cephm.master
 
 # Ensure that you have the correct permissions for the ceph.client.admin.keyring.
 sudo chmod +r /etc/ceph/ceph.client.admin.keyring
@@ -221,7 +264,7 @@ echo "*                                                            *"
 echo "**************************************************************" 
 echo
 
-cat << EOF > /home/vagrant/create_s3g.sh
+cat << EOF > /home/vagrant/my-cluster/create_s3g.sh
 #!/bin/bash
 # 
 # Script to create an S3 Gateway
@@ -246,7 +289,8 @@ curl http://cepha.node1:7480
 
 EOF
 
-chmod +x create_csc.sh create_s3g.sh
+chmod +x step[1-6].sh create_s3g.sh
+chown vagrant:vagrant step[1-6].sh create_s3g.sh
 
 echo
 echo "************************************************"
