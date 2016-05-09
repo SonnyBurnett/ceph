@@ -60,10 +60,12 @@ Vagrant.configure(2) do |config|
 	  cephnode4.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode4"
-		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
-         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
-     
-	 end
+		 unless File.exist?(file_to_disk)
+            vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
+         end
+         vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+		 
+	  end
 	  cephnode4.vm.hostname = "cepha.node1"
 	  
       cephnode4.vm.provision "shell" do |s|
@@ -79,9 +81,7 @@ Vagrant.configure(2) do |config|
 	  cephnode5.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode5"
-		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
-         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
-     
+		 
       end
 	  cephnode5.vm.hostname = "cephb.node2"
 	  
@@ -98,9 +98,7 @@ Vagrant.configure(2) do |config|
 	  cephnode6.vm.provider "virtualbox" do |vb|
 	     vb.memory = 1024
 	     vb.name = "cephnode6"
-		 vb.customize ['createhd', '--filename', file_to_disk, '--size', 5 * 1024]
-         vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
-     
+		 
       end
 	  cephnode6.vm.hostname = "cephc.node3"
 	  
