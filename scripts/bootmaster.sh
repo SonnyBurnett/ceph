@@ -130,7 +130,7 @@ echo
 
 # Make sure all the clocks on the nodes are synchronised
 yum install -y ntp ntpdate ntp-doc
-ntpdate 0.us.pool.ntp.org
+ntpdate nldcr-ntp11.nwd.itc.intranet
 hwclock --systohc
 systemctl enable ntpd.service
 systemctl start ntpd.service
