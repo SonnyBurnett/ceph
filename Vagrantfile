@@ -4,9 +4,15 @@
 file_to_disk = './tmp/large_disk.vdi'
 
 Vagrant.configure(2) do |config|
+
+  # Every Vagrant virtual environment requires a box to build off of.
+    config.vm.box = "centos-7.0_1.0"
+  
+   # The url from where the 'config.vm.box' box will be fetched if it
+   # doesn't already exist on the user's system.
+   config.vm.box_url = "http://build-utils.nl.europe.intranet/vagrantbox/centos-7.0-x86_64_1.0.box"
 	  
    config.vm.define :cephmon1 do |cephmon1|
-      cephmon1.vm.box = "centos/7"  
 	  cephmon1.vm.network "private_network", ip: "192.168.33.81"
 	  cephmon1.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephmon1.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -21,7 +27,6 @@ Vagrant.configure(2) do |config|
    end 
   
   config.vm.define :cephmon2 do |cephmon2|
-      cephmon2.vm.box = "centos/7"  
 	  cephmon2.vm.network "private_network", ip: "192.168.33.82"
 	  cephmon2.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephmon2.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -36,7 +41,6 @@ Vagrant.configure(2) do |config|
    end 
      
    config.vm.define :cephmon3 do |cephmon3|
-      cephmon3.vm.box = "centos/7"  
 	  cephmon3.vm.network "private_network", ip: "192.168.33.83"
 	  cephmon3.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephmon3.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -53,7 +57,6 @@ Vagrant.configure(2) do |config|
  
    
    config.vm.define :cephnode4 do |cephnode4|
-      cephnode4.vm.box = "centos/7"  
 	  cephnode4.vm.network "private_network", ip: "192.168.33.84"
 	  cephnode4.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephnode4.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -74,7 +77,6 @@ Vagrant.configure(2) do |config|
    end
    
    config.vm.define :cephnode5 do |cephnode5|
-      cephnode5.vm.box = "centos/7"  
 	  cephnode5.vm.network "private_network", ip: "192.168.33.85"
 	  cephnode5.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephnode5.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -91,7 +93,6 @@ Vagrant.configure(2) do |config|
    end
    
    config.vm.define :cephnode6 do |cephnode6|
-      cephnode6.vm.box = "centos/7"  
 	  cephnode6.vm.network "private_network", ip: "192.168.33.86"
 	  cephnode6.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephnode6.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
@@ -108,7 +109,6 @@ Vagrant.configure(2) do |config|
    end
    
    config.vm.define :cephmaster do |cephmaster|
-      cephmaster.vm.box = "centos/7"  
 	  cephmaster.vm.network "private_network", ip: "192.168.33.80"
 	  cephmaster.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
 	  cephmaster.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
