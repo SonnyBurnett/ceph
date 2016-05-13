@@ -10,17 +10,6 @@
 #
 # The script is intended for a Centos 7 VM
 #
-
-echo
-echo "************************************************"
-echo "*                                              *"
-echo "*             UPDATE THE SYSTEM                *"  
-echo "*                                              *"  
-echo "************************************************" 
-echo
-
-yum -y update
-
 echo   
 echo "************************************************"
 echo "*                                              *"
@@ -76,7 +65,6 @@ echo "*                                                      *"
 echo "********************************************************" 
 echo
 
-yum update 
 yum install -y ceph-deploy
 
 echo   
