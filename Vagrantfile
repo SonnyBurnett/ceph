@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-file_to_disk = './tmp/large_disk.vdi'
 
 Vagrant.configure(2) do |config|
 
@@ -28,16 +27,17 @@ Vagrant.configure(2) do |config|
   end 
 
   (4..6).each do |i|
+    file_to_disk = "./tmp/large_disk#{i}.vdi"
     config.vm.define "cephnode#{i}" do |cephnode|
       cephnode.vm.network "private_network", ip: "192.168.33.8#{i+1}"
       cephnode.vm.synced_folder ".","/vagrant", type: "virtualbox", disabled: true
       cephnode.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
       cephnode.vm.provider "virtualbox" do |vb|
         vb.memory = 1024
-        unless File.exist?(file_to_disk)
-          vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
-        end
-        vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+       #unless File.exist?(file_to_disk)
+       #  vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
+       #end
+       #vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
 
       end
       cephnode.vm.hostname = "cephnode#{i}"
