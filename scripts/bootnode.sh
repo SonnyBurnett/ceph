@@ -15,6 +15,75 @@
 echo   
 echo "************************************************"
 echo "*                                              *"
+echo "*             INSTALL Internal repos           *"  
+echo "*                                              *"  
+echo "************************************************" 
+echo
+rm /etc/yum.repos.d/*
+cat << EOF > /etc/yum.repos.d/INGmirror.repo
+[base]
+name=CentOS-\$releasever - Base
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/os/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[updates]
+name=CentOS-\$releasever - Updates
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/updates/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[extras]
+name=CentOS-\$releasever - Extras
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/extras/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[centosplus]
+name=CentOS-\$releasever - Plus
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/centosplus/\$basearch/
+exclude=kernel*
+gpgcheck=0
+enabled=1
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=1
+proxy=_none_
+[contrib]
+name=CentOS-\$releasever - Contrib
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/contrib/\$basearch/
+gpgcheck=0
+enabled=0
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=3
+proxy=_none_
+[epel-rhel]
+name=RHEL epel repo
+baseurl=http://registry.ic.ing.net/repository/epel
+enabled=1
+gpgcheck=0
+sslverify=0
+proxy=_none_
+EOF
+
+echo   
+echo "************************************************"
+echo "*                                              *"
 echo "*             INSTALL some basic stuff         *"  
 echo "*                                              *"  
 echo "************************************************" 
