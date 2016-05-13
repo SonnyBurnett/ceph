@@ -138,12 +138,13 @@ mkdir my-cluster
 chown vagrant:vagrant my-cluster
 cd my-cluster
 
-cat << EOF > step2.sh
+cat << EOF > install-ceph.sh
 #!/bin/bash
 # 
 # Script to create a RADOS Ceph Storage Cluster
 # 
 # 
+set -e
 # Create the new cluster by first installing the monitor nodes
 ceph-deploy new cephmon1 cephmon2 cephmon3
 
@@ -154,12 +155,6 @@ echo "osd pool default min size = 1" >> ceph.conf
 echo "osd pool default pg num = 256" >> ceph.conf
 echo "osd pool default pgp num = 256" >> ceph.conf
 echo "osd crush chooseleaf type = 1" >> ceph.conf
-# check
-ceph-deploy disk list cephnode4
-EOF
-
-cat << EOF > step3.sh
-#!/bin/bash
 # 
 # Script to create a RADOS Ceph Storage Cluster
 # 
@@ -173,10 +168,6 @@ ceph-deploy install cephnode6
 ceph-deploy install cephmaster
 # This is a small trick when something goes wrong
 # sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
-EOF
-
-cat << EOF > step4.sh
-#!/bin/bash
 # 
 # Script to create a RADOS Ceph Storage Cluster
 # 
@@ -185,11 +176,6 @@ cat << EOF > step4.sh
 ceph-deploy mon create-initial
 ls -al /home/vagrant/my-cluster/*keyring
 
-EOF
-
-cat << EOF > step5.sh
-#!/bin/bash
-# 
 # Script to create a RADOS Ceph Storage Cluster
 # 
 # Prepare the OSD's
@@ -197,11 +183,6 @@ ceph-deploy osd prepare cephnode4:/var/local/osd cephnode5:/var/local/osd cephno
 
 # activate the OSDs.
 ceph-deploy osd activate cephnode4:/var/local/osd cephnode5:/var/local/osd cephnode6:/var/local/osd
-
-EOF
-
-cat << EOF > step6.sh
-#!/bin/bash
 # 
 # Script to create a RADOS Ceph Storage Cluster
 # 
@@ -252,8 +233,8 @@ curl http://cephnode4:7480
 
 EOF
 
-chmod +x step[1-6].sh create_s3g.sh
-chown vagrant:vagrant step[1-6].sh create_s3g.sh
+chmod +x *.sh
+chown vagrant:vagrant *.sh
 
 echo
 echo "************************************************"
