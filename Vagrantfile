@@ -11,6 +11,7 @@ Vagrant.configure(2) do |config|
    # The url from where the 'config.vm.box' box will be fetched if it
    # doesn't already exist on the user's system.
    config.vm.box_url = "http://build-utils.nl.europe.intranet/vagrantbox/centos-7.0-x86_64_1.0.box"
+   config.vm.boot_timeout = 900
 	  
    config.vm.define :cephmon1 do |cephmon1|
 	  cephmon1.vm.network "private_network", ip: "192.168.33.81"
