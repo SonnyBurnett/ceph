@@ -145,24 +145,6 @@ mkdir my-cluster
 chown vagrant:vagrant my-cluster
 cd my-cluster
 
-cat << EOF > step1.sh
-#!/bin/bash
-# 
-# Script to create a RADOS Ceph Storage Cluster
-# 
-# Create a key on the admin node and copy it to all the other nodes
-# so the admin node can communicate without a password to the nodes
-ssh-keygen
-ssh-copy-id vagrant@ceph1.mon1
-ssh-copy-id vagrant@ceph2.mon2
-ssh-copy-id vagrant@ceph3.mon3
-ssh-copy-id vagrant@cepha.node1
-ssh-copy-id vagrant@cephb.node2
-ssh-copy-id vagrant@cephc.node3
-ssh-copy-id vagrant@cephm.master
-
-EOF
-
 cat << EOF > step2.sh
 #!/bin/bash
 # 

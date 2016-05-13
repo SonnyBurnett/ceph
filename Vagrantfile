@@ -24,6 +24,7 @@ Vagrant.configure(2) do |config|
 	  cephmon1.vm.hostname = "ceph1.mon1"
       cephmon1.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end 
   
@@ -38,6 +39,7 @@ Vagrant.configure(2) do |config|
 	  cephmon2.vm.hostname = "ceph2.mon2"
       cephmon2.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end 
      
@@ -52,6 +54,7 @@ Vagrant.configure(2) do |config|
 	  cephmon3.vm.hostname = "ceph3.mon3"
       cephmon3.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end
    
@@ -74,6 +77,7 @@ Vagrant.configure(2) do |config|
 	  
       cephnode4.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end
    
@@ -90,6 +94,7 @@ Vagrant.configure(2) do |config|
 	  
       cephnode5.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end
    
@@ -106,6 +111,7 @@ Vagrant.configure(2) do |config|
 	  
       cephnode6.vm.provision "shell" do |s|
           s.path = "scripts/bootnode.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end
    
@@ -120,6 +126,7 @@ Vagrant.configure(2) do |config|
       cephmaster.vm.hostname = "ceph.master"	  
       cephmaster.vm.provision "shell" do |s|
           s.path = "scripts/bootmaster.sh"
+          s.path = "scripts/sshkeys.sh"
       end
    end
     

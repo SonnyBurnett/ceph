@@ -1,0 +1,41 @@
+#!/bin/bash
+mkdir -p /home/vagrant/.ssh
+chmod 700 -R /home/vagrant/.ssh
+cat << EOT > /home/vagrant/.ssh/id_rsa
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAuqP+E7O6mnlvhyXGJtiCGjBaX6YewW+7flAG23TWVfs8vMJ2
+h/sE+wulJIvD8yukorG6Ao4mUHeBfI8VX56Dtl3X2KdbQCc9c6wPMSlCdr9GA56e
+7XfsH4Ijw1nCOTvWtKprKswCgXsl28BYBcWmOGCKwXSNM/G+H0+tMCzSxDhmuZYM
+U//1niVrNUgABGIAe4FwOzL7yX+4IiCEjPzTcWSsYfbG8XhZyCz9OCUSrB8TBGJP
+lMdm30r666D9DhSOIfYkpRnZZ6SN3hceuZnMKV+x6naDZiYS9nsJhN+CuLcIAWFO
+cOOuzRFiQnAqv3I423asg4eLUwhoXgWx75seCwIDAQABAoIBAEs83qislDW/bFEr
+zhRMxS2vfk7+lXlfBFMoCYugLuMcU2C4d7XbYCefiyQPX5+AYW7gfF6ZVSKs+jrv
+JyuTp/71F5UT6foTl3cwzjMAMfXSp3PAFssdw8bz3FzcqyoNUEEmTetDsGLn9NwA
+TruM8LPbXzQbOuzMr9rJcMRx3UkRztxOdTxPOAfHLYVAZBoQTRmASUAMozvB8SDz
+rGtHOivSQ12AVuxvNHW4y3JYEOggWWbLw91h45Qv8SkSGzFeDgVJtvs0QQPoUf1I
+JewBlcKwsVY8TdMegPvmW66TGaVkgcnzv3M8XmLb+/xIshIny45oYdH7DXcz9KSf
+49eJQekCgYEA6d/z8rJdPK7l0sLk7+2mXkNJvjzdzOsxF+yUiwRHkQhv0SxiIgiw
+UKgQmUWtumReuqAv2fuHxyRAcS+clVLKFqlYWFxGs7bQPlAxsW5UDFA0j1Cu4mzL
+MSricT1Y5+qt7d0fMrhrJcQ6AWdEPh17HQNIaj5YIMnupsV8XhyfV6UCgYEAzEwb
+lA6a3EsbiT+uGUe7OaCw/MSXVX0nTg70FJlAlmcDpq6fCZSzNn6k31QY/a1Mzmx/
+9BwayHAEI6Z0UnUdELcSLBcaZ8Pn20JBN+GbmuNUM3s7EK0cZmEtXpEB1Irwx0mo
+CwtU7Z/J2kTpcpG54+H80Xwg9FCr82Cet+rtL+8CgYBU7rew04V4nCtqNszdNPjO
+ErGdHI2P9XmGrqvjMFKtINs6o1uf8HfXUrF0eBF3NywPqky2ZNoSP+AHOrsqnz40
+rJsgu6IRcbp+ZrElNmPfdOEhirN4FvpTiLdjWFwJHPi9AShrSv3eYTyPdekahapI
+BwEtVCa9AZhhiCZ6JvrW4QKBgHnG0BWUExlHJ/XK4KMvD9oNABLbuH176abs4O86
+XraIVzPPGPukCKNuICcDQRZNa+AL6sV+zzQ1GTKK8QGJz7Z7+bgQWWwK6bTXrHp7
+374WzcUWKqIJHkmkmV+qPhYMb/PK4wEaUxiFy9NwilsBpHXC6mmQfTBEugqLyHBG
+9/U/AoGBAKC+RrtNRnS2yWV+GHVEKaIotwy0VMqz3656qUmGcNgrnLLWwkFTKfNh
+wi4mN16vcAEpWFPwtRE+mM4fqnT/0s0HD9gP1koc9fND1K9Cmbns/JaaclL7xqab
+M6lex7V8A3mD36HscPVJ0lFIvxrk+SM3Uxb7+Qliq9ouiB792+cf
+-----END RSA PRIVATE KEY-----
+EOT
+cat << EOT > /home/vagrant/.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6o/4Ts7qaeW+HJcYm2IIaMFpfph7Bb7t+UAbbdNZV+zy8wnaH+wT7C6Uki8PzK6SisboCjiZQd4F8jxVfnoO2XdfYp1tAJz1zrA8xKUJ2v0YDnp7td+wfgiPDWcI5O9a0qmsqzAKBeyXbwFgFxaY4YIrBdI0z8b4fT60wLNLEOGa5lgxT//WeJWs1SAAEYgB7gXA7MvvJf7giIISM/NNxZKxh9sbxeFnILP04JRKsHxMEYk+Ux2bfSvrroP0OFI4h9iSlGdlnpI3eFx65mcwpX7HqdoNmJhL2ewmE34K4twgBYU5w467NEWJCcCq/cjjbdqyDh4tTCGheBbHvmx4L vagrant
+EOT
+cat << EOT > /home/vagrant/.ssh/config
+Host *
+    StrictHostKeyChecking no
+EOT
+chmod 600 -R /home/vagrant/.ssh/*
+chown vagrant:vagrant -R /home/vagrant/.ssh
