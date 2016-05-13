@@ -159,13 +159,7 @@ echo "osd crush chooseleaf type = 1" >> ceph.conf
 # Script to create a RADOS Ceph Storage Cluster
 # 
 # Install Ceph on all the nodes, Admin node, OSD's and Monitors
-ceph-deploy install cephmon1 
-ceph-deploy install cephmon2 
-ceph-deploy install cephmon3 
-ceph-deploy install cephnode4 
-ceph-deploy install cephnode5 
-ceph-deploy install cephnode6
-ceph-deploy install cephmaster
+ceph-deploy install --no-adjust-repos cephmon1 cephmon2 cephmon3 cephnode4 cephnode5 cephnode6 cephmaster
 # This is a small trick when something goes wrong
 # sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
 # 
