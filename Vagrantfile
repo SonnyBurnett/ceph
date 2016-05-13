@@ -37,6 +37,7 @@ Vagrant.configure(2) do |config|
        unless File.exist?(file_to_disk)
          vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
        end
+       #Hanging vagrant? try swapping SATA with IDe or vice versa
        vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 1, '--type', 'hdd', '--medium', file_to_disk]
 
       end
