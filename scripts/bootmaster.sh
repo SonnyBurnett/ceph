@@ -25,36 +25,70 @@ yum install -y wget
 echo   
 echo "************************************************"
 echo "*                                              *"
-echo "*             INSTALL elrepo                   *"  
+echo "*             INSTALL Internal repos           *"  
 echo "*                                              *"  
 echo "************************************************" 
 echo
-
-rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/elrepo.repo
-yum install -y yum-utils
-yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
-yum install --nogpgcheck -y epel-release
-rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-rm /etc/yum.repos.d/dl.fedoraproject.org*
-
-echo   
-echo "********************************************************"
-echo "*                                                      *"
-echo "*     create a Yellowdog Updater, Modified (YUM) entry *"  
-echo "*                                                      *"  
-echo "********************************************************" 
-echo
-
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[ceph-noarch]
-name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-giant/el7/noarch
+rm /etc/yum.repos.d/*
+cat << EOF > /etc/yum.repos.d/INGmirror.repo
+[base]
+name=CentOS-\$releasever - Base
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/os/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
 enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
+sslverify=false
+proxy=_none_
+[updates]
+name=CentOS-\$releasever - Updates
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/updates/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[extras]
+name=CentOS-\$releasever - Extras
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/extras/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[centosplus]
+name=CentOS-\$releasever - Plus
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/centosplus/\$basearch/
+exclude=kernel*
+gpgcheck=0
+enabled=1
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=1
+proxy=_none_
+[contrib]
+name=CentOS-\$releasever - Contrib
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/contrib/\$basearch/
+gpgcheck=0
+enabled=0
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=3
+proxy=_none_
+[epel-rhel]
+name=RHEL epel repo
+baseurl=http://registry.ic.ing.net/repository/epel
+enabled=1
+gpgcheck=0
+sslverify=0
+proxy=_none_
 EOF
 
 echo   
