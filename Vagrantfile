@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
    # The url from where the 'config.vm.box' box will be fetched if it
    # doesn't already exist on the user's system.
    config.vm.box_url = "http://build-utils.nl.europe.intranet/vagrantbox/centos-7.0-x86_64_1.0.box"
-   config.vm.boot_timeout = 900
+   config.vm.boot_timeout = 1800
 	  
    config.vm.define :cephmon1 do |cephmon1|
 	  cephmon1.vm.network "private_network", ip: "192.168.33.81"
@@ -22,10 +22,8 @@ Vagrant.configure(2) do |config|
 	     vb.name = "cephmon1"
       end
 	  cephmon1.vm.hostname = "ceph1.mon1"
-      cephmon1.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephmon1.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephmon1.vm.provision "shell", path: "scripts/sshkeys.sh"
    end 
   
   config.vm.define :cephmon2 do |cephmon2|
@@ -37,10 +35,8 @@ Vagrant.configure(2) do |config|
 	     vb.name = "cephmon2"
       end
 	  cephmon2.vm.hostname = "ceph2.mon2"
-      cephmon2.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephmon2.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephmon2.vm.provision "shell", path: "scripts/sshkeys.sh"
    end 
      
    config.vm.define :cephmon3 do |cephmon3|
@@ -52,10 +48,8 @@ Vagrant.configure(2) do |config|
 	     vb.name = "cephmon3"
       end
 	  cephmon3.vm.hostname = "ceph3.mon3"
-      cephmon3.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephmon3.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephmon3.vm.provision "shell", path: "scripts/sshkeys.sh"
    end
    
  
@@ -75,10 +69,8 @@ Vagrant.configure(2) do |config|
 	  end
 	  cephnode4.vm.hostname = "cepha.node1"
 	  
-      cephnode4.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephnode4.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephnode4.vm.provision "shell", path: "scripts/sshkeys.sh"
    end
    
    config.vm.define :cephnode5 do |cephnode5|
@@ -92,10 +84,8 @@ Vagrant.configure(2) do |config|
       end
 	  cephnode5.vm.hostname = "cephb.node2"
 	  
-      cephnode5.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephnode5.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephnode5.vm.provision "shell", path: "scripts/sshkeys.sh"
    end
    
    config.vm.define :cephnode6 do |cephnode6|
@@ -109,10 +99,8 @@ Vagrant.configure(2) do |config|
       end
 	  cephnode6.vm.hostname = "cephc.node3"
 	  
-      cephnode6.vm.provision "shell" do |s|
-          s.path = "scripts/bootnode.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+      cephnode6.vm.provision "shell", path: "scripts/bootnode.sh"
+      cephnode6.vm.provision "shell", path: "scripts/sshkeys.sh"
    end
    
    config.vm.define :cephmaster do |cephmaster|
@@ -124,10 +112,9 @@ Vagrant.configure(2) do |config|
 	     vb.name = "cephmaster"
       end
       cephmaster.vm.hostname = "ceph.master"	  
-      cephmaster.vm.provision "shell" do |s|
-          s.path = "scripts/bootmaster.sh"
-          s.path = "scripts/sshkeys.sh"
-      end
+
+      cephmaster.vm.provision "shell", path: "scripts/bootmaster.sh"
+      cephmaster.vm.provision "shell", path: "scripts/sshkeys.sh"
    end
     
 end
