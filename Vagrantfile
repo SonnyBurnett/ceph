@@ -12,6 +12,7 @@ Vagrant.configure(2) do |config|
   # doesn't already exist on the user's system.
   config.vm.box_url = "http://build-utils.nl.europe.intranet/vagrantbox/centos-7.0-x86_64_1.0.box"
   config.vm.boot_timeout = 1800
+  config.hostmanager.enabled = true
 
   (1..3).each do |i|
     config.vm.define "cephmon#{i}" do |cephmon|
