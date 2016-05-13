@@ -56,7 +56,7 @@ Vagrant.configure(2) do |config|
       vb.memory = 2048
       vb.name = "cephmaster"
     end
-    cephmaster.vm.hostname = "ceph.master"	  
+    cephmaster.vm.hostname = "cephmaster"	  
 
     cephmaster.vm.provision "shell", path: "scripts/bootmaster.sh"
     cephmaster.vm.provision "shell", path: "scripts/sshkeys.sh"
