@@ -34,10 +34,10 @@ Vagrant.configure(2) do |config|
       cephnode.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
       cephnode.vm.provider "virtualbox" do |vb|
         vb.memory = 1024
-       #unless File.exist?(file_to_disk)
-       #  vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
-       #end
-       #vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+       unless File.exist?(file_to_disk)
+         vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
+       end
+       vb.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 1, '--type', 'hdd', '--medium', file_to_disk]
 
       end
       cephnode.vm.hostname = "cephnode#{i}"
