@@ -12,16 +12,74 @@
 #
 # The script is intended for a Centos 7 VM
 #
-
-echo
+echo   
 echo "************************************************"
 echo "*                                              *"
-echo "*             UPDATE THE SYSTEM                *"  
+echo "*             INSTALL Internal repos           *"  
 echo "*                                              *"  
 echo "************************************************" 
 echo
-
-yum -y update
+rm /etc/yum.repos.d/*
+cat << EOF > /etc/yum.repos.d/INGmirror.repo
+[base]
+name=CentOS-\$releasever - Base
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/os/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[updates]
+name=CentOS-\$releasever - Updates
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/updates/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[extras]
+name=CentOS-\$releasever - Extras
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/extras/\$basearch/
+gpgcheck=0
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=1
+priority=1
+enabled=1
+sslverify=false
+proxy=_none_
+[centosplus]
+name=CentOS-\$releasever - Plus
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/centosplus/\$basearch/
+exclude=kernel*
+gpgcheck=0
+enabled=1
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=1
+proxy=_none_
+[contrib]
+name=CentOS-\$releasever - Contrib
+baseurl=https://artifactory-a.ing.net/artifactory/rpm_centos_proxy/\$releasever/contrib/\$basearch/
+gpgcheck=0
+enabled=0
+sslverify=false
+gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-\$releasever
+protect=0
+priority=3
+proxy=_none_
+[epel-rhel]
+name=RHEL epel repo
+baseurl=http://registry.ic.ing.net/repository/epel
+enabled=1
+gpgcheck=0
+sslverify=0
+proxy=_none_
+EOF
 
 echo   
 echo "************************************************"
@@ -37,7 +95,7 @@ yum install -y wget
 
 # Make sure all the clocks on the nodes are synchronised
 yum install -y ntp ntpdate ntp-doc
-ntpdate 0.us.pool.ntp.org
+ntpdate nldcr-ntp11.nwd.itc.intranet
 hwclock --systohc
 systemctl enable ntpd.service
 systemctl start ntpd.service
@@ -62,19 +120,6 @@ systemctl disable firewalld
 # Ensure that your package manager has priority/preferences packages installed and enabled
 yum install -y yum-plugin-priorities
 
-# Make sure the admin node can find the other nodes by name
-cat << EOF > /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.33.80 cephm.master cephm
-192.168.33.81 ceph1.mon1 ceph1
-192.168.33.82 ceph2.mon2 ceph2
-192.168.33.83 ceph3.mon3 ceph3
-192.168.33.84 cepha.node1 cepha
-192.168.33.85 cephb.node2 cephb
-192.168.33.86 cephc.node3 cephc
-EOF
-
 # Create an OSD directory that will be used for the Storage cluster
 mkdir /var/local/osd
 chmod 777 /var/local/osd
@@ -87,4 +132,4 @@ echo "*                                              *"
 echo "************************************************"  
 echo
 
-ip addr | grep 192
+ip route get 8.8.8.8 | awk '/8.8.8.8/ {print $NF}'
