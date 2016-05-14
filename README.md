@@ -38,4 +38,5 @@ $ vagrant plugin install vagrant-hostmanager
 
    $ ceph -s
    
+More info: www.tsbakker.nl/ceph 
 

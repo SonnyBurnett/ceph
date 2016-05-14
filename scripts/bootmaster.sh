@@ -10,27 +10,13 @@
 #
 # The script is intended for a Centos 7 VM
 #
-echo   
-echo "************************************************"
-echo "*                                              *"
-echo "*             INSTALL some basics              *"  
-echo "*                                              *"  
-echo "************************************************" 
-echo
 
-
+#install some basics
 #yum install -y vim
 #yum install -y rpm
 #yum install -y wget
 
-echo   
-echo "************************************************"
-echo "*                                              *"
-echo "*             INSTALL elrepo                   *"  
-echo "*                                              *"  
-echo "************************************************" 
-echo
-
+# install elrepo
 #rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 #rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
 #sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/elrepo.repo
