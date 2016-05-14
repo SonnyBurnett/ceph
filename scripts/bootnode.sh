@@ -13,15 +13,23 @@
 # The script is intended for a Centos 7 VM
 #
 
-echo
+echo   
 echo "************************************************"
 echo "*                                              *"
-echo "*             UPDATE THE SYSTEM                *"  
+echo "*             INSTALL elrepo                   *"  
 echo "*                                              *"  
 echo "************************************************" 
 echo
 
-yum -y update
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/elrepo.repo
+yum install -y yum-utils
+yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
+yum install --nogpgcheck -y epel-release
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+rm /etc/yum.repos.d/dl.fedoraproject.org*
+
 
 echo   
 echo "************************************************"
@@ -62,19 +70,6 @@ systemctl disable firewalld
 # Ensure that your package manager has priority/preferences packages installed and enabled
 yum install -y yum-plugin-priorities
 
-# Make sure the admin node can find the other nodes by name
-cat << EOF > /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.33.80 cephm.master cephm
-192.168.33.81 ceph1.mon1 ceph1
-192.168.33.82 ceph2.mon2 ceph2
-192.168.33.83 ceph3.mon3 ceph3
-192.168.33.84 cepha.node1 cepha
-192.168.33.85 cephb.node2 cephb
-192.168.33.86 cephc.node3 cephc
-EOF
-
 # Create an OSD directory that will be used for the Storage cluster
 mkdir /var/local/osd
 chmod 777 /var/local/osd
@@ -87,4 +82,4 @@ echo "*                                              *"
 echo "************************************************"  
 echo
 
-ip addr | grep 192
+ip route get 8.8.8.8 | awk '/8.8.8.8/ {print $NF}'
