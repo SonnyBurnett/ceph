@@ -18,9 +18,10 @@ echo "*                                              *"
 echo "************************************************" 
 echo
 
-yum install -y vim
-yum install -y rpm
-yum install -y wget
+
+#yum install -y vim
+#yum install -y rpm
+#yum install -y wget
 
 echo   
 echo "************************************************"
@@ -30,14 +31,14 @@ echo "*                                              *"
 echo "************************************************" 
 echo
 
-rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/elrepo.repo
-yum install -y yum-utils
-yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
-yum install --nogpgcheck -y epel-release
-rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-rm /etc/yum.repos.d/dl.fedoraproject.org*
+#rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+#rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+#sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/elrepo.repo
+#yum install -y yum-utils
+#yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ 
+#yum install --nogpgcheck -y epel-release
+#rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+#rm /etc/yum.repos.d/dl.fedoraproject.org*
 
 echo   
 echo "********************************************************"
@@ -77,9 +78,9 @@ echo "********************************************************"
 echo
 
 # Make sure all the clocks on the nodes are synchronised
-yum install -y ntp ntpdate ntp-doc
-ntpdate 0.us.pool.ntp.org
-hwclock --systohc
+#yum install -y ntp ntpdate ntp-doc
+#ntpdate 0.us.pool.ntp.org
+#hwclock --systohc
 systemctl enable ntpd.service
 systemctl start ntpd.service
 
@@ -90,7 +91,7 @@ setenforce 0
 systemctl disable firewalld
 
 # Ensure that your package manager has priority/preferences packages installed and enabled
-yum install -y yum-plugin-priorities
+#yum install -y yum-plugin-priorities
 
 
 echo   
@@ -153,6 +154,43 @@ ceph -s
 # Hope you get an healty state. If so: phase one is done!
 EOF
 
+cat << EOF > repair.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# After an Error occurred
+# 
+# 
+set -e
+sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
+# Install Ceph on the Admin node
+ceph-deploy install --no-adjust-repos cephmaster
+
+# Add the initial monitor(s) and gather the keys
+# After this command you will have 4 keyring files in your home directory
+ceph-deploy mon create-initial
+ls -al /home/vagrant/my-cluster/*keyring
+ 
+# Prepare the OSD's
+ceph-deploy osd prepare cephnode4:/var/local/osd cephnode5:/var/local/osd cephnode6:/var/local/osd
+
+# activate the OSDs.
+ceph-deploy osd activate cephnode4:/var/local/osd cephnode5:/var/local/osd cephnode6:/var/local/osd
+
+# copy the configuration file and admin key to your admin node and your Ceph Nodes
+# so that you can use the ceph CLI 
+ceph-deploy admin cephmon1 cephmon2 cephmon3 cephnode4 cephnode5 cephnode6 cephmaster
+
+# Ensure that you have the correct permissions for the ceph.client.admin.keyring.
+sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+
+# Check your cluster’s health.
+ceph health
+ceph -s
+
+# Hope you get an healty state. If so: phase one is done!
+EOF
+
 echo   
 echo "**************************************************************"
 echo "*                                                            *"
@@ -183,6 +221,24 @@ curl http://cephnode4:7480
 
 # 
 
+
+EOF
+
+cat << EOF > ssh-keys.sh
+#!/bin/bash
+# 
+# Script to create a RADOS Ceph Storage Cluster
+# 
+# Create a key on the admin node and copy it to all the other nodes
+# so the admin node can communicate without a password to the nodes
+ssh-keygen
+ssh-copy-id vagrant@cephmon1
+ssh-copy-id vagrant@cephmon2
+ssh-copy-id vagrant@cephmon3
+ssh-copy-id vagrant@cephnode4
+ssh-copy-id vagrant@cephnode5
+ssh-copy-id vagrant@cephnode6
+ssh-copy-id vagrant@cephmaster
 
 EOF
 

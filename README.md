@@ -10,19 +10,32 @@ $ vagrant plugin install vagrant-hostmanager
    3 Ceph OSD nodes
    
    $ vagrant up
+   
    $ vagrant reload
    
 2. SSH to the Ceph admin node and cd to my-cluster folder.
 
    $ vagrant ssh cephmaster -c
+   
    $ cd my-cluster
+ 
+3. Create an SSH key and copy it to all the nodes
 
-3. Run script to create Ceph Storage Cluster
+   $ ./ssh.keys.sh
+   
+   Note: always choose default option (just enter), password is vagrant
+   unless you changed this.
+
+4. Run script to create Ceph Storage Cluster
 
    $ ./install-ceph.sh
    
-4. Check the health of your new Ceph cluster
+   Note: if something goes wrong, simply run:
+   
+   $ ./repair.sh
+   
+5. Check the health of your new Ceph cluster
 
-   $ ceph -w
+   $ ceph -s
    
 
