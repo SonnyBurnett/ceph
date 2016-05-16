@@ -6,7 +6,8 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   #config.vm.box = "centos/7"
-  config.vm.box = "tsbakker/cephbox"
+  #config.vm.box = "tsbakker/cephbox"
+  config.vm.box = "ceph/centos7"
 
   config.hostmanager.enabled = true
 
@@ -32,11 +33,11 @@ Vagrant.configure(2) do |config|
       cephnode.vm.synced_folder ".","/home/vagrant/sync", type: "virtualbox", disabled: true
       cephnode.vm.provider "virtualbox" do |vb|
         vb.memory = 1024
-       unless File.exist?(file_to_disk)
-         vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
-       end
+       #unless File.exist?(file_to_disk)
+         #vb.customize ['createhd', '--filename', file_to_disk, '--variant', 'Fixed', '--size', 1 * 1024]
+       #end
        #Hanging vagrant? try swapping SATA with IDe or vice versa
-       vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+       #vb.customize ['storageattach', :id,  '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
 
       end
       cephnode.vm.hostname = "cephnode#{i}"

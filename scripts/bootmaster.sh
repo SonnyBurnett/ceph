@@ -12,9 +12,9 @@
 #
 
 #install some basics
-#yum install -y vim
+yum install -y vim
 #yum install -y rpm
-#yum install -y wget
+yum install -y wget
 
 # install elrepo
 #rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
@@ -34,16 +34,37 @@ echo "*                                                      *"
 echo "********************************************************" 
 echo
 
-cat << EOF > /etc/yum.repos.d/ceph.repo
-[ceph-noarch]
-name=Ceph noarch packages
-baseurl=http://download.ceph.com/rpm-giant/el7/noarch
+
+
+#cat << EOF > /etc/yum.repos.d/ceph.repo
+
+[ceph]
+name=Ceph packages for $basearch
+baseurl=http://eu.ceph.com/rpm-hammer/el7/$basearch
 enabled=1
+priority=2
 gpgcheck=1
 type=rpm-md
-gpgkey=https://download.ceph.com/keys/release.asc
-EOF
+gpgkey=https://eu.ceph.com/keys/release.asc
 
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=http://eu.ceph.com/rpm-hammer/el7/noarch
+enabled=1
+priority=2
+gpgcheck=1
+type=rpm-md
+gpgkey=https://eu.ceph.com/keys/release.asc
+
+[ceph-source]
+name=Ceph source packages
+baseurl=http://eu.ceph.com/rpm-hammer/el7/SRPMS
+enabled=0
+priority=2
+gpgcheck=1
+type=rpm-md
+gpgkey=https://eu.ceph.com/keys/release.asc
+EOF
 
 echo   
 echo "********************************************************"
@@ -53,7 +74,9 @@ echo "*                                                      *"
 echo "********************************************************" 
 echo
 
+yum update
 yum install -y ceph-deploy
+
 
 echo   
 echo "********************************************************"
@@ -99,6 +122,10 @@ cat << EOF > install-ceph.sh
 # 
 # 
 set -e
+sudo rpm --import 'https://download.ceph.com/keys/release.asc'
+sudo rpm --import 'https://download.ceph.com/keys/autobuild.asc'
+
+
 # Create the new cluster by first installing the monitor nodes
 ceph-deploy new cephmon1 cephmon2 cephmon3
 
@@ -110,7 +137,7 @@ echo "osd pool default pgp num = 256" >> ceph.conf
 echo "osd crush chooseleaf type = 1" >> ceph.conf
 
 # Install Ceph on all the nodes, Admin node, OSD's and Monitors
-ceph-deploy install --no-adjust-repos cephmon1 cephmon2 cephmon3 cephnode4 cephnode5 cephnode6 cephmaster
+ceph-deploy install --release hammer cephmon1 cephmon2 cephmon3 cephnode4 cephnode5 cephnode6 cephmaster
 
 # This is a small trick when something goes wrong
 # sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
@@ -150,7 +177,7 @@ cat << EOF > repair.sh
 set -e
 sudo mv /etc/yum.repos.d/ceph.repo /etc/yum.repos.d/ceph-deploy.repo
 # Install Ceph on the Admin node
-ceph-deploy install --no-adjust-repos cephmaster
+ceph-deploy install --release hammer cephmaster
 
 # Add the initial monitor(s) and gather the keys
 # After this command you will have 4 keyring files in your home directory
